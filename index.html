@@ -1,7 +1,209 @@
 <!DOCTYPE html>
 <html>
+<head>
+    <link href="https://cdn.bootcdn.net/ajax/libs/jsxgraph/1.4.0/jsxgraph.css" rel="stylesheet">
+    <script src="https://cdn.bootcdn.net/ajax/libs/jsxgraph/1.4.0/jsxgraphcore.js"></script>
+    <style>
+    .collapsible {
+      background-color: #777;
+      color: white;
+      cursor: pointer;
+      padding: 18px;
+      width: 100%;
+      border: none;
+      text-align: left;
+      outline: none;
+      font-size: 15px;
+    }
+
+    .active, .collapsible:hover {
+      background-color: #555;
+    }
+
+    .collapsible:after {
+      content: '\002B';
+      color: white;
+      font-weight: bold;
+      float: right;
+      margin-left: 5px;
+    }
+
+    .active:after {
+      content: "\2212";
+    }
+
+    .content {
+      padding: 0 18px;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.2s ease-out;
+      background-color: #f1f1f1;
+    }
+
+    xmp {
+      font-family: Consolas,"courier new";
+      color: green;
+      background-color: #f1f1f1;
+      padding: 2px;
+      font-size: 90%;
+    }
+    </style>
+</head>
+
 <body>
-<h1>Hello World</h1>
-<p>I'm hosted with GitHub Pages.</p>
+<h2>Linkage mechanism simulation</h2>
+<button class="collapsible">Show HTML</button>
+
+<div class="content">
+<pre><xmp>
+<!DOCTYPE html>
+    <head>
+        <link href="https://cdn.bootcdn.net/ajax/libs/jsxgraph/1.4.0/jsxgraph.css" rel="stylesheet">
+        <script src="https://cdn.bootcdn.net/ajax/libs/jsxgraph/1.4.0/jsxgraphcore.js"></script>
+   </head>
+
+    <body>
+        <h2>Linkage mechanism simulation</h2>
+        <form>
+            Select a mode:<br>
+            <input type="radio" name="mode" id="forward" onchange="forward_mode()" checked="true">Forward kinematics<br>
+            <input type="radio" name="mode" id="inverse" onchange="inverse_mode()">Inverse kinematics<br>
+        </form>
+
+        <!-- <div>Other settings:<br>
+            <input type="checkbox" id="trajectory" defaultChecked="false" onchange="toggle_trajectory()">Show trajectory<br><br>
+        </div> -->
+
+        <div id="box" class="jxgbox" style="width:500px; height:500px;"></div> 
+
+        <script type="text/javascript">
+            var board = JXG.JSXGraph.initBoard('box', {boundingbox: [-3, 3, 3, -3], axis:true, keepAspectRatio:true,
+                 showCopyright:true, showNavigation:false, showScreenshot:true, showClearTraces:true});
+
+            // Create point elements
+            var p1 = board.create('point',[0,0], {name:'A',size:8, fixed:true, face:'^', highlight:false});
+            var p2 = board.create('point',[0,1], {name:'B',size:4, fixed:false, trace:false, highlight:false});
+            var p3 = board.create('point',[0,2], {name:'E',size:0.1, fixed:false, trace:false, highlight:false});
+            var t = board.create('point',[function(){return p3.X();}, function(){return p3.Y();}],
+                                 {name:'',size:8, face:'cross', highlightStrokeColor:'yellow'}); 
+            
+            // Restrict the target point to limited area by limited segment length
+            board.create('segment', [p1, t, function(){ return Math.min(2, t.Dist(p1));}],{strokeWidth:0, highlight:false});
+            // t.on('drag', function(e){});
+
+            // Create circle elements
+            board.create('circle', [p1, 2], {fillColor: 'green', fillOpacity:0.1, strokeWidth:0, highlight:false});
+
+            // Create segment elements
+            var l1 = board.create('segment', [p1, p2, 1], {strokeWidth:6, highlight:false});
+            var l2 = board.create('segment', [p2, p3, 1], {strokeWidth:6, highlight:false});
+
+            var checkbox = board.create('checkbox', [0.8, -2.8, 'Show trajectory'],{fontSize:14});
+            //JXG.addEvent(obj, type, fn, owner)  Adds an event listener to a DOM element.
+            JXG.addEvent(checkbox.rendNodeCheckbox, 'change',
+                function() {
+                    if (this.Value()) 
+                        p3.setAttribute({trace:true});
+                    else 
+                        p3.setAttribute({trace:false});
+                }, checkbox);
+
+
+            function forward_mode()
+            {
+                console.log('Change to forward kinematics mode');
+                p3.free();
+                t.addConstraint([function(){return p3.X();}, function(){return p3.Y();}]); 
+                board.update() 
+            };
+
+            function inverse_mode()
+            {
+                console.log('Change to inverse kinematics mode');
+                t.free();
+                p3.addConstraint([function(){return t.X();}, function(){return t.Y();}]);
+                board.update() 
+            };
+   
+        </script>
+    </body>
+</html>
+</xmp></pre>
+</div>
+
+<form>
+    Select a mode:<br>
+    <input type="radio" name="mode" id="forward" onchange="forward_mode()" checked="true">Forward kinematics<br>
+    <input type="radio" name="mode" id="inverse" onchange="inverse_mode()">Inverse kinematics<br>
+</form>
+
+<script>
+var coll = document.getElementsByClassName("collapsible");
+var i;
+
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+    if (content.style.maxHeight){
+      content.style.maxHeight = null;
+    } else {
+      content.style.maxHeight = content.scrollHeight + "px";
+    } 
+  });
+}
+</script>
+
+<div id="box" class="jxgbox" style="width:500px; height:500px;"></div> 
+    <script type="text/javascript">
+        var board = JXG.JSXGraph.initBoard('box', {boundingbox: [-3, 3, 3, -3], axis:true, keepAspectRatio:true,
+             showCopyright:true, showNavigation:false, showScreenshot:true, showClearTraces:true});
+
+        // Create point elements
+        var p1 = board.create('point',[0,0], {name:'A',size:8, fixed:true, face:'^', highlight:false});
+        var p2 = board.create('point',[0,1], {name:'B',size:4, fixed:false, trace:false, highlight:false});
+        var p3 = board.create('point',[0,2], {name:'E',size:0.1, fixed:false, trace:false, highlight:false});
+        var t = board.create('point',[function(){return p3.X();}, function(){return p3.Y();}],
+                             {name:'',size:8, face:'cross', highlightStrokeColor:'yellow'}); 
+        
+        // Restrict the target point to limited area by limited segment length
+        board.create('segment', [p1, t, function(){ return Math.min(2, t.Dist(p1));}],{strokeWidth:0, highlight:false});
+        // t.on('drag', function(e){});
+
+        // Create circle elements
+        board.create('circle', [p1, 2], {fillColor: 'green', fillOpacity:0.1, strokeWidth:0, highlight:false});
+
+        // Create segment elements
+        var l1 = board.create('segment', [p1, p2, 1], {strokeWidth:6, highlight:false});
+        var l2 = board.create('segment', [p2, p3, 1], {strokeWidth:6, highlight:false});
+
+        var checkbox = board.create('checkbox', [0.8, -2.8, 'Show trajectory'],{fontSize:14});
+        //JXG.addEvent(obj, type, fn, owner)  Adds an event listener to a DOM element.
+        JXG.addEvent(checkbox.rendNodeCheckbox, 'change',
+            function() {
+                if (this.Value()) 
+                    p3.setAttribute({trace:true});
+                else 
+                    p3.setAttribute({trace:false});
+            }, checkbox);
+
+
+        function forward_mode()
+        {
+            console.log('Change to forward kinematics mode');
+            p3.free();
+            t.addConstraint([function(){return p3.X();}, function(){return p3.Y();}]); 
+            board.update() 
+        };
+
+        function inverse_mode()
+        {
+            console.log('Change to inverse kinematics mode');
+            t.free();
+            p3.addConstraint([function(){return t.X();}, function(){return t.Y();}]);
+            board.update() 
+        };
+
+    </script>
 </body>
 </html>
